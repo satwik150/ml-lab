@@ -1,0 +1,495 @@
+1)  N- QUEEN PROBLEM
+#solve N Queen
+# Problem using backtracking
+global N
+N = 4
+
+def printSolution(board):
+	for i in range(N):
+		for j in range(N):
+			print (board[i][j], end = " ")
+		print()
+
+
+def isSafe(board, row, col):
+	for i in range(col):
+		if board[row][i] == 1:
+			return False
+	for i, j in zip(range(row, -1, -1),
+					range(col, -1, -1)):
+		if board[i][j] == 1:
+			return False
+
+	for i, j in zip(range(row, N, 1),
+					range(col, -1, -1)):
+		if board[i][j] == 1:
+			return False
+
+	return True
+
+def solveNQUtil(board, col):
+	if col >= N:
+		return True
+
+	for i in range(N):
+		if isSafe(board, i, col):
+			board[i][col] = 1
+			if solveNQUtil(board, col + 1) == True:
+				return True
+			board[i][col] = 0
+	return False
+
+
+def solveNQ():
+	board = [ [0, 0, 0, 0],
+			[0, 0, 0, 0],
+			[0, 0, 0, 0],
+			[0, 0, 0, 0] ]
+
+	if solveNQUtil(board, 0) == False:
+		print ("Solution does not exist")
+		return False
+
+	printSolution(board)
+	return True
+solveNQ()
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+
+
+2)  WATER JUG
+
+
+
+
+class WaterJug:
+    def __init__(self, jug_capacity, goal_state):
+        self.jug_capacity=jug_capacity
+        self.goal_state=goal_state
+
+    def is_goal_state(self, state):
+        return state == self.goal_state
+
+    def dfs(self):
+        solutions = []
+        def _dfs(path, seen):
+            if (self.is_goal_state(path[-1])):
+                solutions.append(path)
+                return
+            
+            def proceed(ns):
+                if ns not in seen:
+                    seen.add(ns)
+                    _dfs(path + [ns], seen.copy())
+            
+
+            cur_state = path[-1]
+
+            #fill left jug
+            new_state = (self.jug_capacity[0], cur_state[1])
+            proceed(new_state)
+
+            #fill right jug
+            new_state = (cur_state[0], self.jug_capacity[1])
+            proceed(new_state)
+
+            #empty left jug
+            new_state = (0, cur_state[1])
+            proceed(new_state)
+
+            #empty right jug
+            new_state = (cur_state[0],0)
+            proceed(new_state)
+
+
+            #transfer left jug to right jug 
+            rc = self.jug_capacity[1] - cur_state[1]
+            if rc >= cur_state[0]:
+                new_state = (0,cur_state[1] + cur_state[0])
+            else:
+                new_state = (cur_state[0] - rc, self.jug_capacity[1])
+            proceed(new_state)
+
+
+            #transfer right jug to left jug
+            lc = self.jug_capacity[0] - cur_state[0]
+            if lc >= cur_state[1]:
+                new_state = (cur_state[0] + cur_state[1], 0)
+            else:
+                new_state = (self.jug_capacity[0], cur_state[1] - lc)
+            proceed(new_state)
+
+        _dfs([(0,0)],set([(0,0)]))
+        return solutions
+
+def main():
+    wj = WaterJug((4, 3), (2, 0))
+    solns = wj.dfs()
+    for soln in solns:
+        print(soln)
+
+main()
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+
+
+
+3)  BEST FIRST SEARCH
+
+
+
+from queue import PriorityQueue
+print("Enter the no of vertices:")
+v = int(input())
+graph = [[] for i in range(v)]
+
+
+def best_first_search(source, target, n):
+	visited = [False] * n
+	visited[source] = True
+	pq = PriorityQueue()
+	pq.put((0, source))
+	while pq.empty() == False:
+		u = pq.get()[1]
+		print(u, end=" ")
+		if u == target:
+			break
+
+		for v, c in graph[u]:
+			if visited[v] == False:
+				visited[v] = True
+				pq.put((c, v))
+	print()
+
+
+def addedge(x, y, cost):
+	graph[x].append((y, cost))
+	graph[y].append((x, cost))
+
+print("Enter no of edges:")
+n = int(input())
+for i in range(n):
+    print("Enter src,dest and cost")
+    x,y,cost = input(),input(),input()
+    addedge(int(x),int(y),int(cost))
+print("Enter source and target")
+source = int(input())
+target = int(input())
+best_first_search(source, target, v)
+
+
+
+
+
+4)   2D and 3D
+
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+
+def plot_vector2D(label, vector, color='r', origin=(0,0)):
+    origin=np.array(origin)
+    vector=np.array(vector)
+    plt.quiver(*origin, *vector, color=color, angles='xy', scale_units='xy', scale=1)
+    plt.text(*(vector+origin+1), label)
+
+
+
+
+def plot_vector3D(axes, vector, color='r', origin=(0, 0, 0)):
+   axes.quiver(*origin, *vector, color=color) 
+
+
+
+# vizualize 2d vectors
+plt.grid(b=True, which='major')
+plt.xlim([-10, 10])
+plt.ylim([-10, 10])
+
+v1=[5, 7.5]
+v2=[-7.5, 5]
+v3=[0, -8]
+
+plot_vector2D("Vector-1", v1, color='r')
+plot_vector2D("Vector-2", v2, color='g')
+plot_vector2D("Vector-3", v3, color='b')
+
+
+
+
+# vizualize 3d vectors
+ax=plt.axes(projection='3d')
+plt.xlim([-10, 10])
+plt.ylim([-10, 10])
+ax.set_zlim(-10, 10)
+
+v1=[1, 2, 3]
+v2=[-7, -4, 2]
+v3=[3, 4, -2]
+
+plot_vector3D(ax, v1, color='r')
+plot_vector3D(ax, v2, color='g')
+plot_vector3D(ax, v3, color='b')
+
+
+
+# vector addition
+plt.grid(b=True, which='major')
+plt.xlim([-10, 10])
+plt.ylim([-10, 10])
+
+v1=np.array([-2, -5])
+v2=np.array([-2, 7])
+
+plot_vector2D("Vector-1", v1, color='r')
+plot_vector2D("Vector-2", v2, color='g', origin=v1)
+plot_vector2D("Vector-1+ Vector-2", v1+v2, color='b')
+
+
+
+
+
+ax=plt.axes(projection='3d')
+plt.xlim([-10, 10])
+plt.ylim([-10, 10])
+ax.set_zlim(-10, 10)
+
+v1=np.array([1, 2, 3])
+v2=np.array([-2, 1, 2])
+
+plot_vector3D(ax, v1, color='r')
+plot_vector3D(ax, v2, color='g')
+plot_vector3D(ax, np.cross(v1, v2), color='b')
+--------------------------------------------------------------------------------------------------------------
+
+
+5)  Schwarz and Triangular Ineqaulity
+
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+v=np.array(list(map(int,input("Enter vector 1:").split())))
+w=np.array(list(map(int,input("Enter vector 2:").split())))
+
+u=v+w
+origin=[0],[0]
+
+plt.xlim([-10,10])
+plt.ylim([-10,10])
+name1="A+B"
+plt.xlabel("x-axis")
+plt.ylabel("y-axis")
+
+mag_A=np.linalg.norm(v)
+mag_B=np.linalg.norm(w)
+mag_AB=np.linalg.norm(u)
+mag_ab=v@w
+
+print(f"Since |A|.|B|>=|A.B|\n{mag_A:.4f}*{mag_B:.4f}>={mag_ab:.4f}")
+print("Hence it satisfies Schewartz inequality")
+
+print(f"Since |A|+|B|>=|A+B|\n{mag_A:.4f}+{mag_B:.4f}>={mag_AB:.4f}")
+print("Hence it satisfies Triangular inequality")
+
+plt.quiver(*origin,*v,scale=1,units="xy",label=f"A:{mag_A}",color="r")
+plt.quiver(*origin,*w,scale=1,units="xy",label=f"A:{mag_B}",color="g")
+plt.quiver(*origin,*u,scale=1,units="xy",label=f"A:{mag_AB}",color="b")
+plt.grid()
+plt.legend()
+plt.show()
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+
+
+
+6)  AX=y   transformation
+
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+origin = (0,0)
+y=np.array([1,0])
+A=np.array([[5,0],[0,5]])
+A=np.lin.alg.inv(A)
+print(f"INV of A : {A}")
+x = A @ y
+x = np.array(x)
+print (f"A^(-1).y : {x}")
+# Plot y and x
+xecs = np.array([x,y])
+
+plt.ticklabel_format(style='sci', axis='both', scilimits=(0,0))
+plt.quiver(*origin,*x, color='orange',units='xy',scale=0.2)
+plt.quiver(*origin, *y, units='xy', scale=0.2)
+
+plt.xlim(-2, 5)
+plt.ylim(-2, 2.5)
+plt.grid()
+plt.show()
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+8)
+from sklearn.cluster import KMeans
+from sklearn import datasets
+import pandas as pd
+from matplotlib import pyplot as plt
+iris = datasets.load_iris()
+x = iris.data[:,:2]
+d = pd.DataFrame(x)
+print(d)
+km = KMeans(n_clusters=3)
+y = km.fit_predict(d)
+d['c'] = y
+k1 = d[d['c']==0]
+k2 = d[d['c']==1]
+k3 = d[d['c']==2]
+plt.scatter(k1[0],k1[1],color='r')
+plt.scatter(k2[0],k2[1],color='b')
+plt.scatter(k3[0],k3[1],color='g')
+
+
+from sklearn.cluster import KMeans
+from sklearn import datasets
+import pandas as pd
+from matplotlib import pyplot as plt
+from sklearn.mixture import GaussianMixture as gmm
+iris = datasets.load_iris()
+x = iris.data[:,:2]
+d = pd.DataFrame(x)
+print(d)
+gm = gmm(n_components=3)
+y = gm.fit_predict(d)
+d['c'] = y
+k1 = d[d['c']==0]
+k2 = d[d['c']==1]
+k3 = d[d['c']==2]
+plt.scatter(k1[0],k1[1],color='r')
+plt.scatter(k2[0],k2[1],color='b')
+plt.scatter(k3[0],k3[1],color='g')
+
+
+-----------------------------------------------------------------------------------------------------------------
+9)
+
+import seaborn as sns
+from sklearn import linear_model
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+k=sns.load_dataset("iris")
+x=k.iloc[:30,:1]
+y=k.iloc[:30,1:2]
+xtr,xt,ytr,yt = train_test_split(x,y,test_size=1/3)
+model = linear_model.LinearRegression()
+model.fit(xtr,ytr)
+p = model.predict(xt)
+plt.scatter(xt,yt)
+plt.plot(xt,p)
+print("Accuracy:{}".format(r2_score(yt,p)))
+
+import seaborn as sns
+from sklearn import linear_model
+from sklearn import datasets
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix,accuracy_score
+k=datasets.load_iris()
+x=k.data[:,:2]
+y=k.target
+xtr,xt,ytr,yt = train_test_split(x,y,test_size=1/3)
+model = linear_model.LogisticRegression()
+model.fit(xtr,ytr)
+p = model.predict(xt)
+plt.scatter(xt[:,0],xt[:,1],c=p)
+print(confusion_matrix(yt,p))
+print(accuracy_score(yt,p))
+
+
+
+-------------------------------------------------------------------------------------------------
+
+10)
+
+from sklearn.datasets import load_iris
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4)
+
+from sklearn.naive_bayes import GaussianNB
+gnb = GaussianNB()
+gnb.fit(X_train, y_train)
+
+y_pred = gnb.predict(X_test)
+
+from sklearn import metrics
+print("Gaussian Naive Bayes model accuracy(in %):", metrics.accuracy_score(y_test, y_pred)*100)
+print("Confusion matrix:%",metrics.confusion_matrix(y_test,y_pred))
+from matplotlib import pyplot as plt
+plt.scatter(X_test[:,0],X_test[:,1],c=y_pred)
+
+
+
+
+from sklearn import datasets
+iris=datasets.load_iris()
+x=iris.data
+y=iris.target
+import matplotlib.pyplot as plt
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+xtr,xt,ytr,yt=train_test_split(x,y,test_size=1/3)
+from sklearn.tree import DecisionTreeClassifier as dt
+model=dt()
+model.fit(xtr,ytr)
+p = model.predict(xt)
+print("Classification report:%",metrics.confusion_matrix(yt,p))
+plt.scatter(xt[:,0],xt[:,1],c=p)
+fig = plt.figure(figsize=(25,20))
+_ = tree.plot_tree(model, 
+                   feature_names=iris.feature_names,  
+                   class_names=iris.target_names,
+                   filled=True)
+
+
+
+from sklearn import datasets
+iris=datasets.load_iris()
+x=iris.data
+y=iris.target
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+xtr,xt,ytr,yt=train_test_split(x,y,test_size=1/3)
+from sklearn.ensemble import AdaBoostClassifier as ab
+model=ab()
+model.fit(xtr,ytr)
+p = model.predict(xt)
+print("Classification report:%",metrics.confusion_matrix(yt,p))
+plt.scatter(xt[:,0],xt[:,1],c=p)
+
+
+-------------------------------------------------------------------------
+
